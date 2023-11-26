@@ -1,4 +1,5 @@
 from .spot import Spot
 
 class Hazard(Spot):
-  pass
+  def __init__(self):
+    pass

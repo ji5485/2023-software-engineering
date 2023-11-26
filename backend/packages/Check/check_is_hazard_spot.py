@@ -1,4 +1,5 @@
 from .check import Check
 
 class CheckIsHazardSpot(Check):
-  pass
+  def __init__(self):
+    pass
