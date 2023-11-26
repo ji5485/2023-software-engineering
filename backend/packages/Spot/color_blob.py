@@ -1,4 +1,4 @@
 from .spot import Spot
-
 class ColorBlob(Spot):
-  pass
+  def __init__(self):
+    pass

@@ -1,4 +1,5 @@
 from .spot import Spot
 
 class Empty(Spot):
-  pass
+  def __init__(self):
+    self.detected = 1
