@@ -2,6 +2,7 @@ import styled, { createGlobalStyle } from 'styled-components'
 import Coordinate from './components/Coordinate'
 import Log from './components/Log'
 import Pause from './components/Pause'
+import useInputVoiceCommand from './hooks/useInputVoiceCommand'
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -34,6 +35,9 @@ const Section = styled.div`
 `
 
 export default function App() {
+  const { startRecording, stopRecording, isRecording, isPending } =
+    useInputVoiceCommand()
+
   return (
     <>
       <GlobalStyle />
@@ -41,7 +45,10 @@ export default function App() {
       <Coordinate width={10} height={6} />
       <Section>
         <Log />
-        <Pause />
+        <Pause
+          onClick={isRecording ? stopRecording : startRecording}
+          isRecording={isRecording}
+        />
       </Section>
     </>
   )
