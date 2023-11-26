@@ -1,6 +1,11 @@
 import styled from 'styled-components'
 
-export const Wrapper = styled.button`
+type PauseProps = {
+  onClick: () => void
+  isRecording: boolean
+}
+
+export const Wrapper = styled.button<{ $isRecording: boolean }>`
   border-radius: 8px;
   border: 0;
   background: #7950f2;
@@ -16,6 +21,10 @@ export const Wrapper = styled.button`
   }
 `
 
-export default function Pause() {
-  return <Wrapper>일시정지</Wrapper>
+export default function Pause({ onClick, isRecording }: PauseProps) {
+  return (
+    <Wrapper onClick={onClick} $isRecording={isRecording}>
+      {isRecording ? '녹음 중...' : '일시정지'}
+    </Wrapper>
+  )
 }
