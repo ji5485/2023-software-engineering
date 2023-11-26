@@ -1,18 +1,10 @@
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-
-from Spot.color_blob import ColorBlob
-from Spot.empty import Empty
-from Spot.hazard import Hazard
-from Spot.predefined import Predefined
-from Position.position import Position
+from packages.Position import Position
+from packages.Spot import Predefined
 
 class AddOn:
-  def __init__(self, map, point):   # robot 잠시 제거, def __init__(self, map, robot):
+  def __init__(self, map, robot):
     self.map = map
-    self.point = point      # 임시, 로봇의 현재 위치
-    # self.robot = robot
+    self.robot = robot
 
   def create_spot(self, spot, position):
     pass
