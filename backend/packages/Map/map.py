@@ -1,12 +1,22 @@
+# from packages.Spot import Empty, ColorBlob, Hazard, Predefined
+# from packages.Check import CheckBoundary, CheckIsEmptySpot, CheckIsHazardSpot, DetectColorBlobSpot, DetectHazardSpot
+
 import numpy as np
-from packages.Spot import Empty, ColorBlob, Hazard, Predefined
-from packages.Check import CheckBoundary, CheckIsEmptySpot, CheckIsHazardSpot, DetectColorBlobSpot, DetectHazardSpot
+import sys, os
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+
+from Spot import ColorBlob, Empty, Hazard, Predefined
+from Check import (Check, CheckBoundary, CheckIsEmptySpot,
+                   CheckIsHazardSpot, DetectColorBlobSpot, DetectHazardSpot)
+
+
+
 
 class Map:
   def __init__(self, width, height):
     self.width = width
     self.height = height
-    self.spots = [[Empty() for _ in range(width)] for _ in range(height)]
+    self.spots = [[Empty() for _ in range(width+1)] for _ in range(height+1)]
 
   def get_width(self):
     return self.width
@@ -16,7 +26,7 @@ class Map:
 
   def get_spot(self, position):
     x, y = position.get_x(), position.get_y()
-    return self.spots[y][x]
+    return self.spots[-(y+1)][x]
 
   def print_map(self):
     show_map = np.zeros((self.height + 1, self.width + 1), dtype=np.int64)

@@ -4,6 +4,3 @@ class Spot:
 
   def arrived(self):
     pass
-
-
-  detected = None

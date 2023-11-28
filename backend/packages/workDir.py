@@ -1,23 +1,22 @@
-from AddOn.add_on import AddOn
-
-from Check.check import Check
-from Check.check_boundary import CheckBoundary
-from Check.check_is_empty_spot import CheckIsEmptySpot
-from Check.check_is_hazard_spot import CheckIsHazardSpot
-from Check.detect_color_blob_spot import DetectColorBlobSpot
-from Check.detect_hazard_spot import DetectHazardSpot
-
-from Map.map import Map
-from Movement import forward, movement, turn
-from Path import path
-from Position.position import Position
-from Spot.color_blob import ColorBlob
-from Spot.empty import Empty
-from Spot.hazard import Hazard
-from Spot.predefined import Predefined
+from AddOn import AddOn
+from Check import (Check, CheckBoundary, CheckIsEmptySpot,
+                   CheckIsHazardSpot, DetectColorBlobSpot, DetectHazardSpot)
+from Map import Map
+from Movement import Movement, Forward, Turn
+from Path import Path
+from Position import Position
+from Spot import ColorBlob, Empty, Hazard, Predefined
 
 
-import numpy as np
+
+import sys, os
+
+sys.path.append(os.path.dirname(os.path.abspath(os.path.abspath(os.path.dirname(__file__)))))
+from api import Robot, SIM
+
+
+
+
 
 print("맵 크기는?", end= " ")
 x, y = map(int, input().split(','))
@@ -27,18 +26,15 @@ total_map.print_map()
 
 
 
-# print("시작 좌표는?", end= " ")
-# x, y = map(int, input().split(','))
-# pos = Position(x, y)
-# start =
-#
-# Map = setMap.startPoint(Map, [x, y])
-# print(Map)
+print("로봇의 시작 위치는?", end=" ")
+x, y = map(int, input().split(','))
+
+robot = Robot(Position(x, y))
 
 
 
-num = int(input("탐색 위치 개수는? "))
-for _ in range(num):
+num1 = int(input("탐색 위치 개수는? "))
+for _ in range(num1):
     print("탐색 위치는?", end=" ")
     x, y = map(int, input().split(','))
     pos = Position(x, y)
@@ -53,8 +49,8 @@ for _ in range(num):
 total_map.print_map()
 
 
-num = int(input("위험 지점 개수는? "))
-for _ in range(num):
+num2 = int(input("위험 지점 개수는? "))
+for _ in range(num2):
     print("위험 지점은?", end=" ")
     x, y = map(int, input().split(','))
     pos = Position(x, y)
@@ -69,19 +65,8 @@ for _ in range(num):
 total_map.print_map()
 
 
+addon = AddOn(total_map, robot)
 
-print("로봇의 시작 위치는?", end=" ")
-x, y = map(int, input().split(','))
-point = Position(x, y)              # 형식상 만들기만 함
-sightPoint = Position(x+1, y)       # 형식상 만들기만 함
-
-robot = AddOn(total_map, point)            # 로봇 class 만들기 전
-
-robot.create_path()                 # 경로 생성하기
-
-
-
-
-# path = setMap.routeSearch(Map)
-# # print(path)
-# # setMap.moveSimulation(path, Map)
+for _ in range(num1):
+    addon.create_path()  # 경로 생성하기
+    addon.move_robot()  # 로봇 움직이기

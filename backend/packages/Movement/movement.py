@@ -1,3 +1,3 @@
 class Movement:
-  def execute(self):
+  def execute(self, robot):
     pass
