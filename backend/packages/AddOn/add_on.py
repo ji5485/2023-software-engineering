@@ -130,8 +130,7 @@ class AddOn:
     stack.append(startPoint)
     while len(stack) != 0:
       here = stack.pop()
-      while here in visited:
-        here = stack.pop()
+
       self.path.append(here)
       if isinstance(self.map.get_spot(here), Predefined) and self.map.get_spot(here).detect == 0:
         break
@@ -143,14 +142,14 @@ class AddOn:
           if CheckBoundary().check(self.map, temp):
             if not CheckIsHazardSpot().check(self.map, temp) and temp not in visited:
               count += 1
-              branch.append(temp)
+              branch.append(here)
               stack.append(temp)
-        if count == 1:
+        if count >= 1:
           del branch[-1]
         if count == 0:
           while self.path[-1] != branch[-1]:
             del self.path[-1]
-          del self.path[-1]
+          del branch[-1]
 
     if isinstance(self.map.get_spot(self.path[-1]), Predefined):
       del self.path[0]
