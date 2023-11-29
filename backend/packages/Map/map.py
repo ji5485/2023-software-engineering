@@ -6,7 +6,7 @@ class Map:
   def __init__(self, width, height):
     self.width = width
     self.height = height
-    self.spots = [[Empty() for _ in range(width)] for _ in range(height)]
+    self.spots = [[Empty() for _ in range(width+1)] for _ in range(height+1)]
 
   def get_width(self):
     return self.width
@@ -16,7 +16,7 @@ class Map:
 
   def get_spot(self, position):
     x, y = position.get_x(), position.get_y()
-    return self.spots[y][x]
+    return self.spots[-(y+1)][x]
 
   def print_map(self):
     show_map = np.zeros((self.height + 1, self.width + 1), dtype=np.int64)

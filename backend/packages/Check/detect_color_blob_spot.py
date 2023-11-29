@@ -1,6 +1,7 @@
-from packages.Check import CheckBoundary, Check
 from packages.Position import Position
 from packages.Spot import ColorBlob
+from .check import Check
+from .check_boundary import CheckBoundary
 
 class DetectColorBlobSpot(Check):
   def check(self, map, position):

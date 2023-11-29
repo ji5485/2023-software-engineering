@@ -1,5 +1,9 @@
 from packages.Position import Position
 from packages.Spot import Predefined
+from packages.Movement import Forward, Turn
+from packages.Check import CheckBoundary, CheckIsHazardSpot
+
+searchOrder = [[0, 1], [0, -1], [1, 0], [-1, 0]]  # 상, 하, 우, 좌
 
 class AddOn:
   def __init__(self, map, robot):
@@ -13,49 +17,117 @@ class AddOn:
     pass
 
   def move_robot(self):
-    pass
+    if self.path == -1:
+      print('탐색 불가')
+      return 0
+    while len(self.path) != 0:
+      x_diff = self.path[0].get_x() - self.robot.position.get_x()
+      y_diff = self.path[0].get_y() - self.robot.position.get_y()
+      x_corr = self.robot.get_sight_position().get_x() - self.robot.position.get_x()
+      y_corr = self.robot.get_sight_position().get_y() - self.robot.position.get_y()
 
-  def create_path(self):
-    predSet = []
-    # 로봇의 위치 좌표와 시야 좌표를 가지고 경로를 생성하는 부분
-    for i in range(self.map.width + 1):
-      for j in range(self.map.height + 1):
-        if isinstance(self.map.spots[j][i], Predefined):
-          pos = Position(i, len(self.map.spots) - j - 1)
-          predSet.append(pos)
 
-    robotPosition = self.point
-
-    path = [robotPosition]
-
-    while len(predSet) != 0:
-      x_diff = predSet[0].x - robotPosition.x
-      y_diff = predSet[0].y - robotPosition.y
-
-      path = [robotPosition]
-
-      if x_diff > 0:
-        for i in range(x_diff):
-          path.append(Position(path[-1].x + 1, path[-1].y))
+      if x_diff != 0:
+        if x_diff * x_corr <= 0:
+          while True:
+            Turn().execute(self.robot)
+            # print("현재위치", self.robot.position)
+            # print("시야", self.robot.get_sight_position())
+            x_corr = self.robot.get_sight_position().get_x() - self.robot.position.get_x()
+            if x_diff * x_corr > 0:
+              break
+        Forward().execute(self.robot)
+        print("현재위치", self.robot.position)
+        # print("시야", self.robot.get_sight_position())
       else:
-        for i in range(abs(x_diff)):
-          path.append(Position(path[-1].x - 1, path[-1].y))
+        if y_diff * y_corr <= 0:
+          while True:
+            Turn().execute(self.robot)
+            # print("현재위치", self.robot.position)
+            # print("시야", self.robot.get_sight_position())
+            y_corr = self.robot.get_sight_position().get_y() - self.robot.position.get_y()
+            if y_diff * y_corr > 0:
+              break
+        Forward().execute(self.robot)
+        print("현재위치", self.robot.position)
+        # print("시야", self.robot.get_sight_position())
 
-      if y_diff > 0:
-        for i in range(y_diff):
-          path.append(Position(path[-1].x, path[-1].y + 1))
+      del self.path[0]
+
+    print("현재위치", self.robot.position, "탐색완료")
+    self.map.get_spot(self.robot.position).detect = 1
+    # 탐색 완료를 표시하기 위해 detected 값 바꾸기
+
+
+  def create_path(self):    # dfs로 수정 예정
+    # stack = []
+    # self.path = []
+    # visited = []
+    # branch = []
+    # startPoint = self.robot.position
+    #
+    # stack.append(startPoint)
+    # while len(stack) != 0:
+    #   here = stack.pop()
+    #   self.path.append(here)
+    #   if isinstance(self.map.get_spot(here), Predefined):
+    #     break
+    #   else:
+    #     visited.append(here)
+    #     count = 0
+    #     for i in range(4):
+    #       temp = Position(here.get_x() + searchOrder[i][0], here.get_y() + searchOrder[i][1])
+    #       if CheckBoundary().check(self.map, temp):
+    #         if not CheckIsHazardSpot().check(self.map, temp) and temp not in visited:
+    #           count += 1
+    #           branch.append(temp)
+    #           stack.append(temp)
+    #     if count == 1:
+    #       del branch[-1]
+    #     if count == 0:
+    #       while self.path[-1] != branch[-1]:
+    #         del self.path[-1]
+    #       del self.path[-1]
+    #
+    # del self.path[0]
+    # for i in range(len(self.path)):
+    #   print(self.path[i], end=' ')
+    # print()
+
+    stack = []
+    self.path = []
+    visited = []
+    branch = []
+    startPoint = self.robot.position
+
+    stack.append(startPoint)
+    while len(stack) != 0:
+      here = stack.pop()
+
+      self.path.append(here)
+      if isinstance(self.map.get_spot(here), Predefined) and self.map.get_spot(here).detect == 0:
+        break
       else:
-        for i in range(abs(y_diff)):
-          path.append(Position(path[-1].x, path[-1].y - 1))
-      del path[0]
+        visited.append(here)
+        count = 0
+        for i in range(4):
+          temp = Position(here.get_x() + searchOrder[i][0], here.get_y() + searchOrder[i][1])
+          if CheckBoundary().check(self.map, temp):
+            if not CheckIsHazardSpot().check(self.map, temp) and temp not in visited:
+              count += 1
+              branch.append(here)
+              stack.append(temp)
+        if count >= 1:
+          del branch[-1]
+        if count == 0:
+          while self.path[-1] != branch[-1]:
+            del self.path[-1]
+          del branch[-1]
 
-      for i in range(len(path)):
-        if i == len(path) - 1:
-          print(f"({path[i].x}, {path[i].y})", end='')
-        else:
-          print(f"({path[i].x}, {path[i].y})", end='->')
-
-      print('\n', end='')
-
-      del predSet[0]
-
+    if isinstance(self.map.get_spot(self.path[-1]), Predefined):
+      del self.path[0]
+      for i in range(len(self.path)):
+        print(self.path[i], end=' ')
+      print()
+    else:
+      print('dfs 경로 탐색 실패')

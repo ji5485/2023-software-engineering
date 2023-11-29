@@ -1,4 +1,5 @@
 from .movement import Movement
 
 class Turn(Movement):
-  pass
+  def execute(self, robot):
+    robot.turn()
