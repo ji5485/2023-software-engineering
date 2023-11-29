@@ -1,11 +1,13 @@
+import { ReactNode } from 'react'
 import styled from 'styled-components'
 
-type PauseProps = {
+type ButtonProps = {
   onClick: () => void
-  isRecording: boolean
+  disabled?: boolean
+  children: ReactNode
 }
 
-export const Wrapper = styled.button<{ $isRecording: boolean }>`
+export const Wrapper = styled.button<{ $disabled?: boolean }>`
   border-radius: 8px;
   border: 0;
   background: #7950f2;
@@ -21,10 +23,10 @@ export const Wrapper = styled.button<{ $isRecording: boolean }>`
   }
 `
 
-export default function Pause({ onClick, isRecording }: PauseProps) {
+export default function Button({ onClick, disabled, children }: ButtonProps) {
   return (
-    <Wrapper onClick={onClick} $isRecording={isRecording}>
-      {isRecording ? '녹음 중...' : '일시정지'}
+    <Wrapper onClick={onClick} $disabled={disabled}>
+      {children}
     </Wrapper>
   )
 }

@@ -1,8 +1,12 @@
 import styled, { createGlobalStyle } from 'styled-components'
 import Coordinate from './components/Coordinate'
 import Log from './components/Log'
-import Pause from './components/Pause'
+import Form from './components/Form'
+import Button from './components/Button'
+import Robot from './components/Robot'
 import useInputVoiceCommand from './hooks/useInputVoiceCommand'
+import useCreateMap from './hooks/useCreateMap'
+import useRobot from './hooks/useRobot'
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -35,21 +39,80 @@ const Section = styled.div`
 `
 
 export default function App() {
-  const { startRecording, stopRecording, isRecording, isPending } =
+  const { map, form, handleChange, handleCreate } = useCreateMap()
+  const { handleStartRecord, handleStopRecord, isRecording, isPending } =
     useInputVoiceCommand()
+  const { robot, handleSetRobot } = useRobot(
+    !!map && !isRecording && !isPending,
+  )
+
+  const handleCreateMap = async () => {
+    const data = await handleCreate()
+
+    if (!data) return
+
+    handleSetRobot({
+      x: data.position.x,
+      y: data.position.y,
+      direction: data.direction,
+    })
+  }
 
   return (
     <>
       <GlobalStyle />
 
-      <Coordinate width={10} height={6} />
-      <Section>
-        <Log />
-        <Pause
-          onClick={isRecording ? stopRecording : startRecording}
-          isRecording={isRecording}
-        />
-      </Section>
+      {map ? (
+        <Coordinate {...map}>{robot ? <Robot {...robot} /> : null}</Coordinate>
+      ) : null}
+
+      {!map ? (
+        <Section>
+          <Form>
+            <Form.Input
+              name="map"
+              placeholder="맵 크기"
+              value={form.map}
+              onChange={handleChange}
+            />
+            <Form.Input
+              name="start"
+              placeholder="시작 위치"
+              value={form.start}
+              onChange={handleChange}
+            />
+            <Form.Input
+              name="predefined"
+              placeholder="탐색 위치"
+              value={form.predefined}
+              onChange={handleChange}
+            />
+            <Form.Input
+              name="hazard"
+              placeholder="위험 지점"
+              value={form.hazard}
+              onChange={handleChange}
+            />
+            <Form.Input
+              name="colorBlob"
+              placeholder="중요 지점"
+              value={form.colorBlob}
+              onChange={handleChange}
+            />
+          </Form>
+          <Button onClick={handleCreateMap}>재난 지역 모델 생성</Button>
+        </Section>
+      ) : (
+        <Section>
+          <Log />
+          <Button
+            onClick={isRecording ? handleStopRecord : handleStartRecord}
+            disabled={isRecording}
+          >
+            {isRecording ? '녹음 중...' : '일시정지'}
+          </Button>
+        </Section>
+      )}
     </>
   )
 }
