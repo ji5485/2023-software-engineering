@@ -1,5 +1,5 @@
-from .check import Check
 from packages.Spot import Empty
+from .check import Check
 
 class CheckIsEmptySpot(Check):
   def __init__(self):

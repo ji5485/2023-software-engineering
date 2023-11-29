@@ -1,6 +1,6 @@
+from packages.Spot import Hazard
 from .check import Check
 from .check_boundary import CheckBoundary
-from packages.Spot import Hazard
 
 class CheckIsHazardSpot(Check):
 

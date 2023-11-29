@@ -3,7 +3,6 @@ from packages.Spot import Predefined
 from packages.Movement import Forward, Turn
 from packages.Check import CheckBoundary, CheckIsHazardSpot
 
-
 searchOrder = [[0, 1], [0, -1], [1, 0], [-1, 0]]  # 상, 하, 우, 좌
 
 class AddOn:
