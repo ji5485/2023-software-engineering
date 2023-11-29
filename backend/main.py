@@ -73,6 +73,33 @@ async def handle_voice_command(voice: UploadFile = File("./assistant/output_xyst
     
     transcript = client.audio.transcriptions.create(model="whisper-1", file=audio)
 
+    functions = [
+        {
+            "name": "create_hazard_spot",
+            "description": "x, y 좌표를 전달하면 위험 지점을 생성한다.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "x": {"type": "number", "description": "x 좌표를 입력받는다."},
+                    "y": {"type": "number", "description": "y 좌표를 입력받는다."},
+                },
+                "required": ["x", "y"],
+            }
+        },
+        {
+            "name": "create_color_blob_spot",
+            "description": "x, y 좌표를 전달하면 중요 지점을 생성한다.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "x": {"type": "number", "description": "x 좌표를 입력받는다."},
+                    "y": {"type": "number", "description": "y 좌표를 입력받는다."},
+                },
+                "required": ["x", "y"],
+            }
+        }
+    ]
+
     response = client.chat.completions.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": transcript.text}],
