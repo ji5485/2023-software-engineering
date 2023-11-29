@@ -1,8 +1,10 @@
 import styled, { createGlobalStyle } from 'styled-components'
 import Coordinate from './components/Coordinate'
 import Log from './components/Log'
-import Pause from './components/Pause'
+import Form from './components/Form'
+import Button from './components/Button'
 import useInputVoiceCommand from './hooks/useInputVoiceCommand'
+import useCreateMap from './hooks/useCreateMap'
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -35,6 +37,7 @@ const Section = styled.div`
 `
 
 export default function App() {
+  const { map, form, handleChange, handleCreate } = useCreateMap()
   const { startRecording, stopRecording, isRecording, isPending } =
     useInputVoiceCommand()
 
@@ -42,14 +45,24 @@ export default function App() {
     <>
       <GlobalStyle />
 
-      <Coordinate width={10} height={6} />
-      <Section>
-        <Log />
-        <Pause
-          onClick={isRecording ? stopRecording : startRecording}
-          isRecording={isRecording}
-        />
-      </Section>
+      {map ? <Coordinate {...map} /> : null}
+
+      {!map ? (
+        <Section>
+          <Form form={form} handleChange={handleChange} />
+          <Button onClick={() => console.log()}>재난 지역 모델 생성</Button>
+        </Section>
+      ) : (
+        <Section>
+          <Log />
+          <Button
+            onClick={isRecording ? stopRecording : startRecording}
+            disabled={isRecording}
+          >
+            {isRecording ? '녹음 중...' : '일시정지'}
+          </Button>
+        </Section>
+      )}
     </>
   )
 }

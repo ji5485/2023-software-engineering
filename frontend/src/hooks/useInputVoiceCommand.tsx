@@ -1,20 +1,17 @@
 import { useEffect } from 'react'
 import { useAudioRecorder } from 'react-audio-voice-recorder'
 import { useMutation } from '@tanstack/react-query'
-import axios from 'axios'
+import { instance } from '../utils/axios'
 
 export default function useInputVoiceCommand() {
   const { startRecording, stopRecording, recordingBlob, isRecording } =
     useAudioRecorder()
   const { mutate, isPending } = useMutation({
     mutationFn: (voice: Blob) =>
-      axios.post(
+      instance.post(
         '/voice',
         { voice },
-        {
-          headers: { 'Content-Type': 'multipart/form-data' },
-          baseURL: import.meta.env.VITE_SERVER_ENDPOINT,
-        },
+        { headers: { 'Content-Type': 'multipart/form-data' } },
       ),
     onSuccess: () => console.log('success'),
     onError: e => {
