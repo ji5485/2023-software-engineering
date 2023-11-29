@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import { SpotType } from '../utils/type'
 
 type SpotProps = {
-  type: SpotType
+  type?: SpotType
 }
 
 const Wrapper = styled.div`
@@ -19,8 +19,6 @@ const Target = styled.img`
 
 export default function Spot({ type }: SpotProps) {
   return (
-    <Wrapper>
-      <Target src={`${type}.png`} alt={type} />
-    </Wrapper>
+    <Wrapper>{type ? <Target src={`${type}.png`} alt={type} /> : null}</Wrapper>
   )
 }

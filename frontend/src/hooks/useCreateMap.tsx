@@ -2,6 +2,7 @@ import { ChangeEvent, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { instance } from '../utils/axios'
 import { Position } from '../utils/type'
+import useLog from './useLog'
 
 type RequestBody = {
   map: string
@@ -31,6 +32,7 @@ export default function useCreateMap() {
   const { mutateAsync } = useMutation({
     mutationFn: (body: RequestBody) => instance.post<ResponseBody>('/', body),
   })
+  const { addLog } = useLog()
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) =>
     setForm(prev => ({ ...prev, [event.target.name]: event.target.value }))
@@ -42,10 +44,14 @@ export default function useCreateMap() {
       data: { robot, ...data },
     } = await mutateAsync(form)
 
-    setMap(data)
+    setMap({
+      ...data,
+      map: { width: data.map.width + 1, height: data.map.height + 1 },
+    })
+    addLog('재난 지역 모델 생성')
 
     return robot
   }
 
-  return { map, form, handleChange, handleCreate }
+  return { map, form, setMap, handleChange, handleCreate }
 }

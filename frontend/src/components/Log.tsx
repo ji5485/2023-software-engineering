@@ -1,4 +1,11 @@
+import { ReactNode, useCallback, useState } from 'react'
 import styled from 'styled-components'
+import { format } from 'date-fns'
+import useLog, { LogContext } from '../hooks/useLog'
+
+type ContextProps = {
+  children: ReactNode
+}
 
 export const Wrapper = styled.div`
   display: flex;
@@ -24,16 +31,31 @@ export const Description = styled.div`
 `
 
 export default function Log() {
+  const { logs } = useLog()
+
   return (
     <Wrapper>
-      <Item>
-        <Time>15:30:14</Time>
-        <Description>앞으로 1칸 이동</Description>
-      </Item>
-      <Item>
-        <Time>15:30:16</Time>
-        <Description>시계 방향 90도 회전</Description>
-      </Item>
+      {logs.map(({ date, log }, index) => (
+        <Item key={index}>
+          <Time>{date}</Time>
+          <Description>{log}</Description>
+        </Item>
+      ))}
     </Wrapper>
+  )
+}
+
+Log.Context = function Context({ children }: ContextProps) {
+  const [logs, setLogs] = useState<Array<{ date: string; log: string }>>([])
+
+  const addLog = useCallback((log: string) => {
+    const date = format(new Date(), 'HH:mm:ss')
+    setLogs(prev => [...prev, { date, log }])
+  }, [])
+
+  return (
+    <LogContext.Provider value={{ logs, addLog }}>
+      {children}
+    </LogContext.Provider>
   )
 }
