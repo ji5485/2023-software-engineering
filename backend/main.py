@@ -6,6 +6,9 @@ from packages.Map import Map
 from packages.Position import Position
 from packages.Spot import Predefined, Hazard, ColorBlob
 from api import Robot
+from openai import OpenAI
+import json
+import record_voice
 
 app = FastAPI()
 add_on = None
@@ -59,8 +62,29 @@ def create_map(body: MapBody):
 def request_robot_movement():
   return "Request Robot Movement"
 
-@app.post("/voice")
-async def handle_voice_command(voice: UploadFile):
-  audio = await voice.read()
+client = OpenAI(api_key="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")
+information = {'x': None, 'y': None, 'status': None}
 
-  return "Handle Voice Command"
+@app.post("/voice")
+async def handle_voice_command(voice: UploadFile = File("./assistant/output_xystatus.wav")):
+    with open(voice.file, "rb") as audio_file:
+        audio = audio_file.read()
+    
+    transcript = client.audio.transcriptions.create(model="whisper-1", file=audio)
+
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": transcript.text}],
+        functions=functions,
+        function_call="auto"
+    )
+
+    if response.choices[0].message.function_call:
+        name = response.choices[0].message.function_call.name
+        args = json.loads(response.choices[0].message.function_call.arguments)
+
+        registered_functions[name](args.get("x"), args.get("y"))
+    else:
+        print("Failure")
+
+    return JSONResponse(content={"transcript": transcript.text, "information": information})
