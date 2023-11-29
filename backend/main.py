@@ -67,6 +67,7 @@ information = {'x': None, 'y': None, 'status': None}
 
 @app.post("/voice")
 async def handle_voice_command(voice: UploadFile = File("./assistant/output_xystatus.wav")):
+    record_voice.record()
     with open(voice.file, "rb") as audio_file:
         audio = audio_file.read()
     
