@@ -1,4 +1,5 @@
 from .movement import Movement
 
 class Forward(Movement):
-  pass
+  def execute(self, robot):
+    robot.forward()
