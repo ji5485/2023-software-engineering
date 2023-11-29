@@ -1,17 +1,11 @@
-from AddOn import AddOn
-from Check import (Check, CheckBoundary, CheckIsEmptySpot,
+from packages.AddOn import AddOn
+from packages.Check import (Check, CheckBoundary, CheckIsEmptySpot,
                    CheckIsHazardSpot, DetectColorBlobSpot, DetectHazardSpot)
-from Map import Map
-from Movement import Movement, Forward, Turn
-from Path import Path
-from Position import Position
-from Spot import ColorBlob, Empty, Hazard, Predefined
-
-
-
-import sys, os
-
-sys.path.append(os.path.dirname(os.path.abspath(os.path.abspath(os.path.dirname(__file__)))))
+from packages.Map import Map
+from packages.Movement import Movement, Forward, Turn
+from packages.Path import Path
+from packages.Position import Position
+from packages.Spot import ColorBlob, Empty, Hazard, Predefined
 from api import Robot, SIM
 
 

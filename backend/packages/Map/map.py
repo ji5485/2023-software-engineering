@@ -1,16 +1,6 @@
-# from packages.Spot import Empty, ColorBlob, Hazard, Predefined
-# from packages.Check import CheckBoundary, CheckIsEmptySpot, CheckIsHazardSpot, DetectColorBlobSpot, DetectHazardSpot
-
 import numpy as np
-import sys, os
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-
-from Spot import ColorBlob, Empty, Hazard, Predefined
-from Check import (Check, CheckBoundary, CheckIsEmptySpot,
-                   CheckIsHazardSpot, DetectColorBlobSpot, DetectHazardSpot)
-
-
-
+from packages.Spot import Empty, ColorBlob, Hazard, Predefined
+from packages.Check import CheckBoundary, CheckIsEmptySpot, CheckIsHazardSpot, DetectColorBlobSpot, DetectHazardSpot
 
 class Map:
   def __init__(self, width, height):

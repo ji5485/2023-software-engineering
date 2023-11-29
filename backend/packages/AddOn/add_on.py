@@ -1,33 +1,7 @@
-# from packages.Position import Position
-# from packages.Spot import Predefined
-# path for ji5485
-
-
-import sys
-import os
-
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-from Position import Position
-from Spot import ColorBlob, Empty, Hazard, Predefined
-from Check import (Check, CheckBoundary, CheckIsEmptySpot,
-                   CheckIsHazardSpot, DetectColorBlobSpot, DetectHazardSpot)
-from Movement import Movement, Forward, Turn
-
-# from Position.position import Position
-# from Spot.color_blob import ColorBlob
-# from Spot.empty import Empty
-# from Spot.hazard import Hazard
-# from Spot.predefined import Predefined
-# from Check.check import Check
-# from Check.check_boundary import CheckBoundary
-# from Check.check_is_empty_spot import CheckIsEmptySpot
-# from Check.check_is_hazard_spot import CheckIsHazardSpot
-# from Check.detect_color_blob_spot import DetectColorBlobSpot
-# from Check.detect_hazard_spot import DetectHazardSpot
-# from Movement.movement import Movement
-# from Movement.forward import Forward
-# from Movement.turn import Turn
-
+from packages.Position import Position
+from packages.Spot import Predefined
+from packages.Movement import Forward, Turn
+from packages.Check import CheckBoundary, CheckIsHazardSpot
 
 
 searchOrder = [[0, 1], [0, -1], [1, 0], [-1, 0]]  # 상, 하, 우, 좌
