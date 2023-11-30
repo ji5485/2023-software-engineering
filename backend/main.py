@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from packages.AddOn import AddOn
@@ -6,6 +6,9 @@ from packages.Map import Map
 from packages.Position import Position
 from packages.Spot import Predefined, Hazard, ColorBlob
 from api import Robot
+from openai import OpenAI
+import json
+import record_voice
 
 app = FastAPI()
 add_on = None
@@ -59,8 +62,57 @@ def create_map(body: MapBody):
 def request_robot_movement():
   return "Request Robot Movement"
 
-@app.post("/voice")
-async def handle_voice_command(voice: UploadFile):
-  audio = await voice.read()
+client = OpenAI(api_key="")
+information = {'x': None, 'y': None, 'status': None}
 
-  return "Handle Voice Command"
+@app.post("/voice")
+async def handle_voice_command(voice: UploadFile = File("./assistant/output_xystatus.wav")):
+    record_voice.record()
+    with open(voice.file, "rb") as audio_file:
+        audio = audio_file.read()
+    
+    transcript = client.audio.transcriptions.create(model="whisper-1", file=audio)
+
+    functions = [
+        {
+            "name": "create_hazard_spot",
+            "description": "x, y 좌표를 전달하면 위험 지점을 생성한다.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "x": {"type": "number", "description": "x 좌표를 입력받는다."},
+                    "y": {"type": "number", "description": "y 좌표를 입력받는다."},
+                },
+                "required": ["x", "y"],
+            }
+        },
+        {
+            "name": "create_color_blob_spot",
+            "description": "x, y 좌표를 전달하면 중요 지점을 생성한다.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "x": {"type": "number", "description": "x 좌표를 입력받는다."},
+                    "y": {"type": "number", "description": "y 좌표를 입력받는다."},
+                },
+                "required": ["x", "y"],
+            }
+        }
+    ]
+
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": transcript.text}],
+        functions=functions,
+        function_call="auto"
+    )
+
+    if response.choices[0].message.function_call:
+        name = response.choices[0].message.function_call.name
+        args = json.loads(response.choices[0].message.function_call.arguments)
+
+        registered_functions[name](args.get("x"), args.get("y"))
+    else:
+        print("Failure")
+
+    return JSONResponse(content={"transcript": transcript.text, "information": information})
