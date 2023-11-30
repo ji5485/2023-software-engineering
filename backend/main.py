@@ -28,8 +28,8 @@ class MapBody(BaseModel):
 @app.post("/")
 def create_map(body: MapBody):
   # 좌표 파싱
-  [width, height] = map(int, body.map[1:-1].split(" "))
-  [start_x, start_y] = map(int, body.start[1:-1].split(" "))
+  [width, height] = map(int, body.map[1:-1].split())
+  [start_x, start_y] = map(int, body.start[1:-1].split())
   predefined = list(map(lambda coord: list(map(int, coord.split())), body.predefined[2:-2].split(")(")))
   hazard = list(map(lambda coord: list(map(int, coord.split())), body.hazard[2:-2].split(")(")))
   colorBlob = list(map(lambda coord: list(map(int, coord.split())), body.colorBlob[2:-2].split(")(")))
