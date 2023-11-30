@@ -62,7 +62,7 @@ def create_map(body: MapBody):
 def request_robot_movement():
   return "Request Robot Movement"
 
-client = OpenAI(api_key="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")
+client = OpenAI(api_key="")
 information = {'x': None, 'y': None, 'status': None}
 
 @app.post("/voice")
