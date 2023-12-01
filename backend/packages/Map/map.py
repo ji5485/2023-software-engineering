@@ -7,6 +7,8 @@ class Map:
     self.width = width
     self.height = height
     self.spots = [[Empty() for _ in range(width+1)] for _ in range(height+1)]
+    self.numPred= 0
+    self.cnt = 0
 
   def get_width(self):
     return self.width
@@ -40,6 +42,8 @@ class Map:
 
   def add_spot(self, spot, position, checks):
     num = len(checks)
+    if isinstance(spot, Predefined):
+      self.numPred += 1
 
     for i in range(num):
       if isinstance(checks[i], CheckBoundary):
@@ -63,9 +67,18 @@ class Map:
         pass
 
   def detect_spot(self, position):  # 인자 수정
-    x, y = position.get_x(), position.get_y()
-    self.spots[-(y + 1)][x].detect = 1
+    self.get_spot(position).detected()
+    self.print_map()
 
   def arrive_spot(self, position):   # 인자 수정
-    x, y = position.get_x(), position.get_y()
-    self.spots[-(y + 1)][x].detect = 1
+    if isinstance(self.get_spot(position), Predefined) and self.get_spot(position).detect == 0:
+      self.cnt += 1
+      print('탐색!')
+      self.get_spot(position).arrived()
+      if self.cnt == self.numPred:
+        self.print_map()
+        print('탐색 종료')
+        exit()
+    self.get_spot(position).arrived()
+
+

@@ -21,9 +21,7 @@ print("로봇의 시작 위치는?", end=" ")
 x, y = map(int, input().split(','))
 robot = Robot(Position(x, y))
 
-path = Path()   # 추가함
-
-addon = AddOn(total_map, robot, path)
+addon = AddOn(total_map, robot)
 
 
 num1 = int(input("탐색 위치 개수는? "))
@@ -48,11 +46,13 @@ for _ in range(num3):
     x, y = map(int, input().split(','))
     addon.create_spot(Hazard(), Position(x, y))
 total_map.print_map()
+print()
 
-
-for _ in range(num1):
+while True:
     addon.create_path()  # 경로 생성하기
     while len(addon.path.route) != 0:
         addon.move_robot()  # 로봇 움직이기
-    addon.update_robot_position(addon.robot.get_position())
 total_map.print_map()
+
+
+# update robot position을 어떻게 사용할지 다시 고민하기 - test 할 때...

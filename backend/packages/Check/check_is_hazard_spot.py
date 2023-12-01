@@ -6,6 +6,6 @@ class CheckIsHazardSpot(Check):
 
   def __init__(self):
     pass
-  def check(self, map, position):
-    return CheckBoundary().check(map, position) and isinstance(map.get_spot(position), Hazard)
+  def check(self, mapInfo, position):
+    return CheckBoundary().check(mapInfo, position) and isinstance(mapInfo.get_spot(position), Hazard)
 
