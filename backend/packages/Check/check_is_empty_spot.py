@@ -5,8 +5,8 @@ class CheckIsEmptySpot(Check):
   def __init__(self):
     pass
 
-  def check(self, map, position):
-    if isinstance(self.spots[-(position.get_y() + 1)][position.get_x()], Empty):
+  def check(self, mapInfo, position):
+    if isinstance(mapInfo.spots[-(position.get_y() + 1)][position.get_x()], Empty):
       return 1
     else:
       print('비어있지 않음')

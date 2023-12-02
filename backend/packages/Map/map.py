@@ -7,6 +7,8 @@ class Map:
     self.width = width
     self.height = height
     self.spots = [[Empty() for _ in range(width+1)] for _ in range(height+1)]
+    self.numPred= 0
+    self.cnt = 0
 
   def get_width(self):
     return self.width
@@ -23,17 +25,25 @@ class Map:
     for i in range(self.width + 1):
       for j in range(self.height + 1):
         if isinstance(self.spots[j][i], ColorBlob):  # ColorBlob = 5
-          show_map[j][i] = 5
+          if self.spots[j][i].detect == 1:
+            show_map[j][i] = 5
+          else:
+            show_map[j][i] = 0
         if isinstance(self.spots[j][i], Empty):  # Empty = 0
           show_map[j][i] = 0
         if isinstance(self.spots[j][i], Hazard):  # Hazard = 4
-          show_map[j][i] = 4
+          if self.spots[j][i].detect == 1:
+            show_map[j][i] = 4
+          else:
+            show_map[j][i] = 0
         if isinstance(self.spots[j][i], Predefined):  # Predefined = 7
           show_map[j][i] = 7
     print(show_map)
 
   def add_spot(self, spot, position, checks):
     num = len(checks)
+    if isinstance(spot, Predefined):
+      self.numPred += 1
 
     for i in range(num):
       if isinstance(checks[i], CheckBoundary):
@@ -48,20 +58,27 @@ class Map:
         else:
           print('비어있지 않음')
           return 0
-      elif isinstance(checks[i], CheckIsHazardSpot):
+      elif isinstance(checks[i], CheckIsHazardSpot):    # 굳이 안해도 될거같음
         if isinstance(self.spots[-(position.y+1)][position.x], Hazard):
           pass  # hazard 표현
         else:
           pass  # hazard가 아니니 괜찮다~
-      elif isinstance(checks[i], DetectColorBlobSpot):
-        pass
-      elif isinstance(checks[i], DetectHazardSpot):
-        pass
       else:
         pass
 
-  def detect_spot(robot):
-    pass
+  def detect_spot(self, position):  # 인자 수정
+    self.get_spot(position).detected()
+    self.print_map()
 
-  def arrive_spot(robot):
-    pass
+  def arrive_spot(self, position):   # 인자 수정
+    if isinstance(self.get_spot(position), Predefined) and self.get_spot(position).detect == 0:
+      self.cnt += 1
+      print('탐색!')
+      self.get_spot(position).arrived()
+      if self.cnt == self.numPred:
+        self.print_map()
+        print('탐색 종료')
+        exit()
+    self.get_spot(position).arrived()
+
+

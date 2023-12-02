@@ -10,8 +10,6 @@ from api import Robot, SIM
 
 
 
-
-
 print("맵 크기는?", end= " ")
 x, y = map(int, input().split(','))
 total_map = Map(x, y)
@@ -19,48 +17,42 @@ total_map = Map(x, y)
 total_map.print_map()
 
 
-
 print("로봇의 시작 위치는?", end=" ")
 x, y = map(int, input().split(','))
-
 robot = Robot(Position(x, y))
 
+addon = AddOn(total_map, robot)
 
 
 num1 = int(input("탐색 위치 개수는? "))
 for _ in range(num1):
     print("탐색 위치는?", end=" ")
     x, y = map(int, input().split(','))
-    pos = Position(x, y)
-    pred = Predefined()
-    temp = []
-    # boundary, empty
-    temp.append(CheckBoundary())
-    temp.append(CheckIsEmptySpot())
-
-    total_map.add_spot(pred, pos, temp)
-
+    addon.create_spot(Predefined(), Position(x, y))
 total_map.print_map()
 
 
-num2 = int(input("위험 지점 개수는? "))
+num2 = int(input("중요 지점 개수는? "))
 for _ in range(num2):
+    print("중요 지점은?", end=" ")
+    x, y = map(int, input().split(','))
+    addon.create_spot(ColorBlob(), Position(x, y))
+total_map.print_map()
+
+
+num3 = int(input("위험 지점 개수는? "))
+for _ in range(num3):
     print("위험 지점은?", end=" ")
     x, y = map(int, input().split(','))
-    pos = Position(x, y)
-    haz = Hazard()
-    temp = []
-    # boundary, empty
-    temp.append(CheckBoundary())
-    temp.append(CheckIsEmptySpot())
+    addon.create_spot(Hazard(), Position(x, y))
+total_map.print_map()
+print()
 
-    total_map.add_spot(haz, pos, temp)
-
+while True:
+    addon.create_path()  # 경로 생성하기
+    while len(addon.path.route) != 0:
+        addon.move_robot()  # 로봇 움직이기
 total_map.print_map()
 
 
-addon = AddOn(total_map, robot)
-
-for _ in range(num1):
-    addon.create_path()  # 경로 생성하기
-    addon.move_robot()  # 로봇 움직이기
+# update robot position을 어떻게 사용할지 다시 고민하기 - test 할 때...

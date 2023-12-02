@@ -1,5 +1,11 @@
 from .spot import Spot
 class ColorBlob(Spot):
   def __init__(self):
+    self.detect = 0
+
+  def detected(self):
     self.detect = 1
-    # 음성으로 들어왔을 땐 detect: 0 _ 음성 part와 병합하면서 수정
+    # 로봇이 상하좌우에서 탐지하는 경우 detect = 1 and 지도에 표시
+
+  def arrived(self):
+    pass
