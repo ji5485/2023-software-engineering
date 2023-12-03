@@ -4,6 +4,12 @@ class Spot:
     self.arrive = 0
     pass
 
+  def get_detect(self):
+    return self.detect
+  
+  def get_arrive(self):
+    return self.arrive
+
   def detected(self):
     if not self.detect:
       self.detect = 1

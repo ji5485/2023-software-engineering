@@ -50,7 +50,7 @@ class AddOn:
     while queue:
       current_pos = queue.popleft()
 
-      if isinstance(self.mapInfo.get_spot(current_pos), Predefined) and not self.mapInfo.get_spot(current_pos).arrive:
+      if isinstance(self.mapInfo.get_spot(current_pos), Predefined) and not self.mapInfo.get_spot(current_pos).get_arrive():
         result, target = [], current_pos
 
         while target is not None:
@@ -70,7 +70,7 @@ class AddOn:
         if next_pos in visited:
           continue
 
-        if CheckIsHazardSpot().check(self.mapInfo, next_pos) and self.mapInfo.get_spot(next_pos).detect == 1:
+        if CheckIsHazardSpot().check(self.mapInfo, next_pos) and self.mapInfo.get_spot(next_pos).get_detect() == 1:
           continue
 
         queue.append(next_pos)

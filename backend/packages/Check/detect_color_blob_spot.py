@@ -9,7 +9,7 @@ class DetectColorBlobSpot(Check):
 
     for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
       pos = Position(x + dx, y + dy)
-      if CheckBoundary().check(mapInfo, pos) and isinstance(mapInfo.get_spot(pos), ColorBlob) and mapInfo.get_spot(pos).detect == 0:
+      if CheckBoundary().check(mapInfo, pos) and isinstance(mapInfo.get_spot(pos), ColorBlob) and mapInfo.get_spot(pos).get_detect() == 0:
         mapInfo.detect_spot(pos)
         detected.append(pos)
     
