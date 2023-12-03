@@ -7,13 +7,13 @@ from packages.Path import Path
 search_order = [[0, 1], [0, -1], [1, 0], [-1, 0]]  # 상, 하, 우, 좌
 
 class AddOn:
-  def __init__(self, map, robot):
-    self.map = map
+  def __init__(self, mapInfo, robot):
+    self.mapInfo = mapInfo
     self.robot = robot
     self.path = Path([])
 
   def create_spot(self, spot, position):
-    self.map.add_spot(spot, position, [CheckBoundary(), CheckIsEmptySpot()])
+    return self.mapInfo.add_spot(spot, position, [CheckBoundary(), CheckIsEmptySpot()])
 
   def update_robot_position(self):
     self.create_path()
@@ -22,17 +22,17 @@ class AddOn:
     movement = self.path.create_movement(self.robot)
 
     if movement is None:
-      if self.map.is_finished():
+      if self.mapInfo.is_finished():
         return { "finished": True, "error": None }
       else:
         return { "finished": False, "error": "경로 탐색 실패" }
 
     movement.execute(self.robot)
 
-    if not CheckBoundary().check(self.map, self.robot.get_position()):
+    if not CheckBoundary().check(self.mapInfo, self.robot.get_position()):
       return { "finished": True, "error": "재난 지역 모델 이탈" }
 
-    result = self.map.arrive_spot(self.robot.get_position())
+    result = self.mapInfo.arrive_spot(self.robot.get_position())
 
     if not result.get("finished") and result.get("is_predefined"):
       self.create_path()
@@ -40,17 +40,17 @@ class AddOn:
     return result
 
   def create_path(self):
-    if not CheckBoundary().check(self.map, self.robot.get_position()) or CheckIsHazardSpot().check(self.map, self.robot.get_position()):
+    if not CheckBoundary().check(self.mapInfo, self.robot.get_position()) or CheckIsHazardSpot().check(self.mapInfo, self.robot.get_position()):
       return False
     
-    path = [[None] * (self.map.get_width() + 1) for _ in range(self.map.get_height() + 1)]
+    path = [[None] * (self.mapInfo.get_width() + 1) for _ in range(self.mapInfo.get_height() + 1)]
     queue = deque([self.robot.get_position()])
     visited = [self.robot.get_position()]
 
     while queue:
       current_pos = queue.popleft()
 
-      if isinstance(self.map.get_spot(current_pos), Predefined) and not self.map.get_spot(current_pos).arrive:
+      if isinstance(self.mapInfo.get_spot(current_pos), Predefined) and not self.mapInfo.get_spot(current_pos).arrive:
         result, target = [], current_pos
 
         while target is not None:
@@ -64,13 +64,13 @@ class AddOn:
       for [x, y] in search_order:
         next_pos = current_pos + Position(x, y)
 
-        if not CheckBoundary().check(self.map, next_pos):
+        if not CheckBoundary().check(self.mapInfo, next_pos):
           continue
 
         if next_pos in visited:
           continue
 
-        if CheckIsHazardSpot().check(self.map, next_pos) and self.map.get_spot(next_pos).detect == 1:
+        if CheckIsHazardSpot().check(self.mapInfo, next_pos) and self.mapInfo.get_spot(next_pos).detect == 1:
           continue
 
         queue.append(next_pos)

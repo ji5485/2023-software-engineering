@@ -8,7 +8,7 @@ type ContextProps = {
 }
 
 export const Wrapper = styled.div`
-  overflow-y: auto;
+  overflow: auto;
   display: flex;
   flex-direction: column;
   gap: 5px;

@@ -5,8 +5,6 @@ class Path:
     self.route = route
 
   def create_movement(self, robot):
-    print([(pos.get_x(), pos.get_y()) for pos in self.route])
-
     if len(self.route) <= 1:
       return None
 

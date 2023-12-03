@@ -44,7 +44,7 @@ export default function App() {
   const { form, handleChange, handleCreate } = useCreateMap()
   const { handleStartRecord, handleStopRecord, isRecording, isPending } =
     useInputVoiceCommand()
-  const { robot, handleSetRobot, refetch } = useRobot(
+  const { robot, finished, handleSetRobot } = useRobot(
     !!map && !isRecording && !isPending,
   )
 
@@ -106,13 +106,16 @@ export default function App() {
       ) : (
         <Section>
           <Log />
-          <Button
-            onClick={isRecording ? handleStopRecord : handleStartRecord}
-            disabled={isRecording}
-          >
-            {isRecording ? '녹음 중...' : '일시정지'}
-          </Button>
-          <button onClick={() => refetch()}>Refetch</button>
+          {!finished ? (
+            <Button
+              onClick={isRecording ? handleStopRecord : handleStartRecord}
+              disabled={isRecording}
+            >
+              {isRecording ? '녹음 중...' : '일시정지'}
+            </Button>
+          ) : (
+            <Button onClick={() => window.location.reload()}>탐색 종료</Button>
+          )}
         </Section>
       )}
     </>

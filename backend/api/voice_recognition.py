@@ -64,10 +64,10 @@ class VoiceRecognition:
       return { "status": False, "spot": None }
 
   def create_hazard_spot(self, x, y):
-    self.add_on.create_spot(Hazard(), Position(x, y))
-    return { "spot": "hazard", "position": { "x": x, "y": y } }
+    result = self.add_on.create_spot(Hazard(), Position(x, y))
+    return { "spot": "hazard", "position": { "x": x, "y": y } } if result else None
 
   def create_color_blob_spot(self, x, y):
-    self.add_on.create_spot(ColorBlob(), Position(x, y))
-    return { "spot": "color_blob", "position": { "x": x, "y": y } }
+    result = self.add_on.create_spot(ColorBlob(), Position(x, y))
+    return { "spot": "color_blob", "position": { "x": x, "y": y } } if result else None
 

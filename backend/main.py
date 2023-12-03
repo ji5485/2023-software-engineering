@@ -1,3 +1,4 @@
+import io
 from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -72,6 +73,9 @@ def request_robot_movement():
 
   if sensor_data.get("positioning"):
     add_on.update_robot_position()
+  
+  if sensor_data.get("hazard"):
+    add_on.create_path()
 
   result = add_on.move_robot()
 
@@ -90,13 +94,13 @@ async def handle_voice_command(voice: UploadFile):
 
   if not add_on:
     return { "status": False, "text": None, "result": None }
-  
-  print(voice.content_type, voice.filename)
 
   audio = await voice.read()
+  buffer = io.BytesIO(audio)
+  buffer.name = "audio.webm"
+
   voice_recognition = VoiceRecognition(add_on)
-  text = voice_recognition.recognize(voice.file)
-  print(text)
+  text = voice_recognition.recognize(buffer)
   result = voice_recognition.parse(text)
 
   return { "status": result.get("status"), "text": text, "result": result.get("spot") }

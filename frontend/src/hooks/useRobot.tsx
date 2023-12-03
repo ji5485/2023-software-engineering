@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { instance } from '../utils/axios'
 import { Position, SpotType } from '../utils/type'
 import useLog from './useLog'
@@ -25,12 +25,14 @@ export default function useRobot(enabled: boolean) {
   const [delayedEnabled, setDelayedEnabled] = useState<boolean>(enabled)
   const [robot, setRobot] = useState<RobotType | null>(null)
 
+  const queryClient = useQueryClient()
   const { addLog } = useLog()
   const { handleDetectSpot } = useMap()
-  const { data, refetch } = useQuery({
+  const { data } = useQuery({
     queryKey: ['robot'],
-    queryFn: () => instance.post<ResponseBodyType>('/robot', {}),
-    // refetchInterval: !finished ? 3000 : false,
+    queryFn: ({ signal }) =>
+      instance.post<ResponseBodyType>('/robot', {}, { signal }),
+    refetchInterval: !finished ? 2500 : false,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     retry: false,
@@ -41,8 +43,11 @@ export default function useRobot(enabled: boolean) {
 
   useEffect(() => {
     if (enabled) setTimeout(() => setDelayedEnabled(true), 3000)
-    else setDelayedEnabled(false)
-  }, [enabled])
+    else {
+      queryClient.cancelQueries({ queryKey: ['robot'] })
+      setDelayedEnabled(false)
+    }
+  }, [enabled, queryClient])
 
   useEffect(() => {
     if (!data) return
@@ -50,11 +55,11 @@ export default function useRobot(enabled: boolean) {
     const { robot, finished, error, is_predefined, sensor_data } = data.data
 
     if (is_predefined)
-      setTimeout(() => addLog(`탐색 완료 (${data.data.ratio})`), 0)
+      setTimeout(() => addLog(`탐색 완료 (${data.data.ratio})`), 10)
 
     if (finished) {
       setFinished(true)
-      if (error) setTimeout(() => addLog(error), 0)
+      if (error) setTimeout(() => addLog(error), 10)
     }
 
     if (sensor_data.positioning) addLog('로봇 위치 재설정')
@@ -74,5 +79,5 @@ export default function useRobot(enabled: boolean) {
     if (robot) handleSetRobot(data.data.robot)
   }, [data, addLog, handleDetectSpot, handleSetRobot])
 
-  return { robot, handleSetRobot, refetch }
+  return { robot, finished, handleSetRobot }
 }
