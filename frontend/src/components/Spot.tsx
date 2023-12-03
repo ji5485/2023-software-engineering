@@ -3,6 +3,7 @@ import { SpotType } from '../utils/type'
 
 type SpotProps = {
   type?: SpotType
+  detected?: boolean
 }
 
 const Wrapper = styled.div`
@@ -13,12 +14,18 @@ const Wrapper = styled.div`
   height: 100%;
 `
 
-const Target = styled.img`
+const Target = styled.img<{ $detected?: boolean }>`
   max-width: 60%;
+  opacity: ${({ $detected }) => ($detected ? 1 : 0.2)};
+  transition: opacity 0.3s ease-in-out;
 `
 
-export default function Spot({ type }: SpotProps) {
+export default function Spot({ type, detected }: SpotProps) {
   return (
-    <Wrapper>{type ? <Target src={`${type}.png`} alt={type} /> : null}</Wrapper>
+    <Wrapper>
+      {type ? (
+        <Target src={`${type}.png`} alt={type} $detected={detected} />
+      ) : null}
+    </Wrapper>
   )
 }

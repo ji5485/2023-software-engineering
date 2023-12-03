@@ -1,94 +1,80 @@
+from collections import deque
 from packages.Position import Position
-from packages.Spot import Predefined, Hazard
-from packages.Movement import Forward, Turn
-from packages.Check import (CheckBoundary, CheckIsEmptySpot,
-                            CheckIsHazardSpot, DetectColorBlobSpot, DetectHazardSpot)
+from packages.Spot import Predefined
+from packages.Check import CheckBoundary, CheckIsEmptySpot, CheckIsHazardSpot
 from packages.Path import Path
 
-searchOrder = [[0, 1], [0, -1], [1, 0], [-1, 0]]  # 상, 하, 우, 좌
+search_order = [[0, 1], [0, -1], [1, 0], [-1, 0]]  # 상, 하, 우, 좌
 
 class AddOn:
   def __init__(self, map, robot):
     self.map = map
     self.robot = robot
+    self.path = Path([])
+
   def create_spot(self, spot, position):
-    temp = []
-    # boundary, empty
-    temp.append(CheckBoundary())
-    temp.append(CheckIsEmptySpot())
-    self.map.add_spot(spot, position, temp)
+    self.map.add_spot(spot, position, [CheckBoundary(), CheckIsEmptySpot()])
 
   def update_robot_position(self):
-    if self.path.route[0] != self.robot.get_position():
-      print('경로 재탐색')
-      self.create_path()
-      return 0
-    else:
-      return 1
+    self.create_path()
 
   def move_robot(self):
+    movement = self.path.create_movement(self.robot)
 
-    temp = self.path.createMovement(self.robot)
+    if movement is None:
+      if self.map.is_finished():
+        return { "finished": True, "error": None }
+      else:
+        return { "finished": False, "error": "경로 탐색 실패" }
 
-    # 체크하기
-    DetectHazardSpot().check(self.map, self.robot.get_sight_position())
-    DetectColorBlobSpot().check(self.map, self.robot.get_position())
+    movement.execute(self.robot)
 
-    if isinstance(temp, Turn):
-      temp.execute(self.robot)
-    else:
-      if isinstance(self.map.get_spot(self.robot.get_sight_position()), Hazard):
-        print('경로 재탐색')
-        self.create_path()
+    if not CheckBoundary().check(self.map, self.robot.get_position()):
+      return { "finished": True, "error": "재난 지역 모델 이탈" }
 
-      temp.execute(self.robot)
-      print("현재위치", self.robot.get_position())
+    result = self.map.arrive_spot(self.robot.get_position())
 
-      if CheckBoundary().check(self.map, self.robot.get_position()) == 0:
-        print('경계를 넘어감')
-        exit()
-
-      self.map.arrive_spot(self.robot.get_position()) # Spot에 대하여 도착, 로봇이 움직였으니
-
-      if self.update_robot_position() == 1:
-        self.path.removeCurrentPosition()  # 이동 완료한 경로 지우기 / 정상 이동 case
-
-
+    if not result.get("finished") and result.get("is_predefined"):
+      self.create_path()
+    
+    return result
 
   def create_path(self):
-    stack = []
-    tempPath = []
-    visited = []
-    branch = []
-    startPoint = self.robot.get_position()
+    if not CheckBoundary().check(self.map, self.robot.get_position()) or CheckIsHazardSpot().check(self.map, self.robot.get_position()):
+      return False
+    
+    path = [[None] * (self.map.get_width() + 1) for _ in range(self.map.get_height() + 1)]
+    queue = deque([self.robot.get_position()])
+    visited = [self.robot.get_position()]
 
-    stack.append(startPoint)
-    while len(stack) != 0:
-      here = stack.pop()
+    while queue:
+      current_pos = queue.popleft()
 
-      tempPath.append(here)
-      if isinstance(self.map.get_spot(here), Predefined) and self.map.get_spot(here).detect == 0:
-        break
-      else:
-        visited.append(here)
-        count = 0
-        for i in range(4):
-          temp = Position(here.get_x() + searchOrder[i][0], here.get_y() + searchOrder[i][1])
-          if CheckBoundary().check(self.map, temp):
-            if not CheckIsHazardSpot().check(self.map, temp) and temp not in visited:
-              count += 1
-              branch.append(here)
-              stack.append(temp)
-        if count >= 1:
-          del branch[-1]
-        if count == 0:
-          while tempPath[-1] != branch[-1]:
-            del tempPath[-1]
-          del branch[-1]
+      if isinstance(self.map.get_spot(current_pos), Predefined) and not self.map.get_spot(current_pos).arrive:
+        result, target = [], current_pos
 
-    if isinstance(self.map.get_spot(tempPath[-1]), Predefined):
-      del tempPath[0]
-      self.path = Path(tempPath)
-    else:
-      print('dfs 경로 탐색 실패')
-      return 0
+        while target is not None:
+          result.append(target)
+          target = path[-(target.get_y() + 1)][target.get_x()]
+
+        self.path = Path(result[::-1])
+
+        return True
+
+      for [x, y] in search_order:
+        next_pos = current_pos + Position(x, y)
+
+        if not CheckBoundary().check(self.map, next_pos):
+          continue
+
+        if next_pos in visited:
+          continue
+
+        if CheckIsHazardSpot().check(self.map, next_pos) and self.map.get_spot(next_pos).detect == 1:
+          continue
+
+        queue.append(next_pos)
+        visited.append(next_pos)
+        path[-(next_pos.get_y() + 1)][next_pos.get_x()] = current_pos
+    
+    return False

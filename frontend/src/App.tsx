@@ -7,6 +7,7 @@ import Robot from './components/Robot'
 import useInputVoiceCommand from './hooks/useInputVoiceCommand'
 import useCreateMap from './hooks/useCreateMap'
 import useRobot from './hooks/useRobot'
+import useMap from './hooks/useMap'
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -35,14 +36,15 @@ const Section = styled.div`
   grid-template-rows: 1fr 50px;
   grid-gap: 20px;
   width: 300px;
-  min-height: 400px;
+  height: 400px;
 `
 
 export default function App() {
-  const { map, form, handleChange, handleCreate } = useCreateMap()
+  const { map } = useMap()
+  const { form, handleChange, handleCreate } = useCreateMap()
   const { handleStartRecord, handleStopRecord, isRecording, isPending } =
     useInputVoiceCommand()
-  const { robot, handleSetRobot } = useRobot(
+  const { robot, handleSetRobot, refetch } = useRobot(
     !!map && !isRecording && !isPending,
   )
 
@@ -52,8 +54,7 @@ export default function App() {
     if (!data) return
 
     handleSetRobot({
-      x: data.position.x,
-      y: data.position.y,
+      position: { x: data.position.x, y: data.position.y },
       direction: data.direction,
     })
   }
@@ -63,7 +64,7 @@ export default function App() {
       <GlobalStyle />
 
       {map ? (
-        <Coordinate {...map}>{robot ? <Robot {...robot} /> : null}</Coordinate>
+        <Coordinate>{robot ? <Robot {...robot} /> : null}</Coordinate>
       ) : null}
 
       {!map ? (
@@ -111,6 +112,7 @@ export default function App() {
           >
             {isRecording ? '녹음 중...' : '일시정지'}
           </Button>
+          <button onClick={() => refetch()}>Refetch</button>
         </Section>
       )}
     </>
