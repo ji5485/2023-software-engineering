@@ -3,6 +3,7 @@ from .movement import Movement
 
 class Forward(Movement):
   def execute(self, robot):
-    if np.random.uniform() < 0.02:
+    if np.random.uniform() < 0.5:
       robot.forward()
+
     robot.forward()

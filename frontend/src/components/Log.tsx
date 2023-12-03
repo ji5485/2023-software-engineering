@@ -1,4 +1,4 @@
-import { ReactNode, useCallback, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 import { format } from 'date-fns'
 import useLog, { LogContext } from '../hooks/useLog'
@@ -8,6 +8,7 @@ type ContextProps = {
 }
 
 export const Wrapper = styled.div`
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -18,10 +19,11 @@ export const Wrapper = styled.div`
 
 export const Item = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 12px;
 `
 
 export const Time = styled.div`
+  width: 75px;
   padding-right: 10px;
   border-right: 1px solid #5f3dc4;
 `
@@ -31,10 +33,15 @@ export const Description = styled.div`
 `
 
 export default function Log() {
+  const ref = useRef<HTMLDivElement>(null)
   const { logs } = useLog()
 
+  useEffect(() => {
+    if (ref.current) ref.current.scrollTo(0, ref.current.scrollHeight)
+  }, [logs])
+
   return (
-    <Wrapper>
+    <Wrapper ref={ref}>
       {logs.map(({ date, log }, index) => (
         <Item key={index}>
           <Time>{date}</Time>

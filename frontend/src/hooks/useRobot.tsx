@@ -1,18 +1,23 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { instance } from '../utils/axios'
+import { Position, SpotType } from '../utils/type'
 import useLog from './useLog'
+import useMap from './useMap'
 
-type RobotType = {
-  x: number
-  y: number
-  direction: number
-}
+type RobotType = { position: Position; direction: number }
 
 type ResponseBodyType = {
+  error: string | null
   finished: boolean
-  position: RobotType
-  direction: number
+  robot: RobotType
+  is_predefined: boolean
+  ratio: string
+  sensor_data: {
+    hazard: Position
+    color_blob: Position[]
+    positioning: boolean
+  }
 }
 
 export default function useRobot(enabled: boolean) {
@@ -21,16 +26,18 @@ export default function useRobot(enabled: boolean) {
   const [robot, setRobot] = useState<RobotType | null>(null)
 
   const { addLog } = useLog()
-  const { data } = useQuery({
+  const { handleDetectSpot } = useMap()
+  const { data, refetch } = useQuery({
     queryKey: ['robot'],
     queryFn: () => instance.post<ResponseBodyType>('/robot', {}),
-    refetchInterval: !finished ? 3000 : false,
+    // refetchInterval: !finished ? 3000 : false,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
+    retry: false,
     enabled: !finished && delayedEnabled,
   })
 
-  const handleSetRobot = (robot: RobotType) => setRobot(robot)
+  const handleSetRobot = useCallback((robot: RobotType) => setRobot(robot), [])
 
   useEffect(() => {
     if (enabled) setTimeout(() => setDelayedEnabled(true), 3000)
@@ -38,11 +45,34 @@ export default function useRobot(enabled: boolean) {
   }, [enabled])
 
   useEffect(() => {
-    if (data?.data.finished) {
-      setFinished(true)
-      addLog('탐색 완료')
-    } else if (data) addLog('로봇 이동')
-  }, [data, addLog])
+    if (!data) return
 
-  return { robot, handleSetRobot }
+    const { robot, finished, error, is_predefined, sensor_data } = data.data
+
+    if (is_predefined)
+      setTimeout(() => addLog(`탐색 완료 (${data.data.ratio})`), 0)
+
+    if (finished) {
+      setFinished(true)
+      if (error) setTimeout(() => addLog(error), 0)
+    }
+
+    if (sensor_data.positioning) addLog('로봇 위치 재설정')
+
+    if (sensor_data.hazard) {
+      handleDetectSpot(SpotType.HAZARD, sensor_data.hazard)
+      addLog('위험 지점 탐지')
+    }
+
+    if (sensor_data.color_blob.length > 0) {
+      sensor_data.color_blob.forEach(position =>
+        handleDetectSpot(SpotType.COLOR_BLOB, position),
+      )
+      addLog('중요 지점 탐지')
+    }
+
+    if (robot) handleSetRobot(data.data.robot)
+  }, [data, addLog, handleDetectSpot, handleSetRobot])
+
+  return { robot, handleSetRobot, refetch }
 }

@@ -2,27 +2,19 @@ from packages.Movement import Forward, Turn
 
 class Path:
   def __init__(self, route):
-      self.route = route
-  def createMovement(self, robot):
+    self.route = route
 
-    nextPos = self.route[0]
+  def create_movement(self, robot):
+    print([(pos.get_x(), pos.get_y()) for pos in self.route])
 
-    x_diff = nextPos.get_x() - robot.position.get_x()
-    y_diff = nextPos.get_y() - robot.position.get_y()
-    x_corr = robot.get_sight_position().get_x() - robot.position.get_x()
-    y_corr = robot.get_sight_position().get_y() - robot.position.get_y()
+    if len(self.route) <= 1:
+      return None
 
-    if x_diff != 0:
-      if x_diff * x_corr <= 0:
-        return Turn()
-      else:
-        return Forward()
+    if robot.get_sight_position() == self.route[1]:
+      self.remove_current_position()
+      return Forward()
     else:
-      if y_diff * y_corr <= 0:
-        return Turn()
-      else:
-        return Forward()
+      return Turn()
 
-
-  def removeCurrentPosition(self):
-      del self.route[0]
+  def remove_current_position(self):
+    del self.route[0]
